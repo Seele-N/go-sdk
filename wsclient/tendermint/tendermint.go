@@ -12,6 +12,7 @@ import (
 // nolint
 type (
 	Block              = tmtypes.Block
+	ResultBlock        = ctypes.ResultBlock
 	ResultBlockResults = ctypes.ResultBlockResults
 	ResultCommit       = ctypes.ResultCommit
 	ResultValidators   = ctypes.ResultValidators
@@ -27,9 +28,13 @@ type Client struct {
 
 // ClientService the interface of tendermint client
 type ClientService interface {
-	QueryBlock(height int64) (*Block, error)
-	QueryBlockResults(height int64) (*ResultBlockResults, error)
 	QueryStatus() (pStatus *ResultStatus, err error)
+	QueryBlock(height int64) (*ResultBlock, error)
+	QueryBlockResults(height int64) (*ResultBlockResults, error)
+	QueryBlockByHash(hashHexStr string) (*ResultBlock, error)
+	QueryTxResult(hashHexStr string, prove bool) (pResultTx *ResultTx, err error)
+	QueryValidatorsResult(height int64) (pValsResult *ResultValidators, err error)
+	QueryCommitResult(height int64) (pCommitResult *ResultCommit, err error)
 }
 
 // NewClient new tendermint client
@@ -47,19 +52,14 @@ func (c Client) QueryStatus() (pStatus *ResultStatus, err error) {
 
 // QueryBlock gets the block info of a specific height
 // query the latest block with height 0 input
-func (c Client) QueryBlock(height int64) (pBlock *Block, err error) {
+func (c Client) QueryBlock(height int64) (pBlock *ResultBlock, err error) {
 
 	var pHeight *int64
 	if height > 0 {
 		pHeight = &height
 	}
 
-	pTmBlockResult, err := c.Block(context.Background(), pHeight)
-	if err != nil {
-		return
-	}
-
-	return pTmBlockResult.Block, err
+	return c.Block(context.Background(), pHeight)
 }
 
 // QueryBlockResults gets the abci result of the block on a specific height
@@ -75,19 +75,13 @@ func (c Client) QueryBlockResults(height int64) (pBlockResults *ResultBlockResul
 }
 
 // QueryBlockByHash get the abci result of the block by hash
-func (c Client) QueryBlockByHash(hashHexStr string) (pBlock *Block, err error) {
+func (c Client) QueryBlockByHash(hashHexStr string) (pBlock *ResultBlock, err error) {
 	hash, err := hex.DecodeString(hashHexStr)
 	if err != nil {
 		return
 	}
 
-	pTmBlockResult, err := c.BlockByHash(context.Background(), hash)
-
-	if err != nil {
-		return
-	}
-
-	return pTmBlockResult.Block, err
+	return c.BlockByHash(context.Background(), hash)
 }
 
 // QueryTxResult gets the detail info of a tx with its tx hash
