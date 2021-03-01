@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"context"
+	"encoding/hex"
 
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -71,4 +72,57 @@ func (c Client) QueryBlockResults(height int64) (pBlockResults *ResultBlockResul
 	}
 
 	return c.BlockResults(context.Background(), pHeight)
+}
+
+// QueryBlockByHash get the abci result of the block by hash
+func (c Client) QueryBlockByHash(hashHexStr string) (pBlock *Block, err error) {
+	hash, err := hex.DecodeString(hashHexStr)
+	if err != nil {
+		return
+	}
+
+	pTmBlockResult, err := c.BlockByHash(context.Background(), hash)
+
+	if err != nil {
+		return
+	}
+
+	return pTmBlockResult.Block, err
+}
+
+// QueryTxResult gets the detail info of a tx with its tx hash
+func (c Client) QueryTxResult(hashHexStr string, prove bool) (pResultTx *ResultTx, err error) {
+	hash, err := hex.DecodeString(hashHexStr)
+	if err != nil {
+		return
+	}
+
+	return c.Tx(context.Background(), hash, prove)
+}
+
+// QueryValidatorsResult gets the validators info on a specific height
+// query the latest block with height 0 input
+func (c Client) QueryValidatorsResult(height int64) (pValsResult *ResultValidators, err error) {
+
+	var pHeight *int64
+	if height > 0 {
+		pHeight = &height
+	}
+
+	var page, perPage int
+	page = 1
+	perPage = 0
+	return c.Validators(context.Background(), pHeight, &page, &perPage)
+}
+
+// QueryCommitResult gets the commit info of the block on a specific height
+// query the latest block with height 0 input
+func (c Client) QueryCommitResult(height int64) (pCommitResult *ResultCommit, err error) {
+
+	var pHeight *int64
+	if height > 0 {
+		pHeight = &height
+	}
+
+	return c.Commit(context.Background(), pHeight)
 }
