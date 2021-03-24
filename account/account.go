@@ -15,9 +15,15 @@ import (
 	//ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
+	
 )
 
 type Wallet interface {
+	GetPrivKey() crypto.PrivKey
+	GetPubAddress() crypto.Address
+	ExportAsMnemonic() (string, error)
+	ExportAsPrivateKey() (string, error)
+	//ExportAsKeyStore(password string) (*EncryptedKeyJSON, error)
 }
 
 type wallet struct {
@@ -25,6 +31,35 @@ type wallet struct {
 	//addr     ctypes.AccAddress
 	mnemonic string
 }
+
+func (w *wallet) GetPrivKey() crypto.PrivKey {
+	return w.privKey
+}
+
+func (w *wallet) GetPubAddress() crypto.Address {
+	return w.privKey.PubKey().Address()
+}
+
+func (w *wallet) ExportAsMnemonic() (string, error) {
+	if w.mnemonic == "" {
+		return "", fmt.Errorf("This wallet is not recover from mnemonic or anto generated ")
+	}
+	return w.mnemonic, nil
+}
+
+func (w *wallet) ExportAsPrivateKey() (string, error) {
+	secpPrivateKey, ok := w.privKey.(secp256k1.PrivKey)
+	if !ok {
+		return "", fmt.Errorf(" Only PrivKeySecp256k1 key is supported ")
+	}
+	return hex.EncodeToString(secpPrivateKey[:]), nil
+}
+
+/*
+func (w *wallet) ExportAsKeyStore(password string) (*EncryptedKeyJSON, error) {
+	return generateKeyStore(w.GetPrivKey(), password)
+}
+*/
 
 func NewWallet() (Wallet, error) {
 	entropy, err := bip39.NewEntropy(256)
@@ -56,14 +91,6 @@ func NewWalletFromKeyStore(file string, password string) (Wallet, error) {
 	err := w.createFromKeyStore(file, password)
 	return &w, err
 }
-
-/*
-func NewWalletFromKeybase() (Wallet, error) {
-	w := wallet{}
-	err := w.createFromLedgerKey(path)
-	return &w, err
-}
-*/
 
 func (w *wallet) createFromMnemonic(mnemonic, keyPath string) error {
 	words := strings.Split(mnemonic, " ")
