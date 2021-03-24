@@ -1,10 +1,9 @@
-import client
+package client
 
 import (
 	"context"
 	"encoding/hex"
 
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -22,10 +21,10 @@ type (
 )
 
 // QueryChainID query chain id
-func (c *SeeleClient) QueryChainID() (string,error){
-	result,err := c.QueryStatus()
-	if err != nil{
-		return "",err
+func (c *SeeleClient) QueryChainID() (string, error) {
+	result, err := c.QueryStatus()
+	if err != nil {
+		return "", err
 	}
 	return result.NodeInfo.Network, nil
 }
