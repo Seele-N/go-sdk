@@ -5,6 +5,7 @@ package types
 // ClientConfig records the base config of gosdk client
 type ClientConfig struct {
 	NodeURI       string
+	GRpcURI       string
 	ChainID       string
 	BroadcastMode string
 	Gas           uint64
@@ -14,11 +15,12 @@ type ClientConfig struct {
 }
 
 // NewClientConfig new ClientConfig
-func NewClientConfig(nodeURI, chainID string, broadcastMode string, feesStr string, gas uint64, gasAdjustment float64,
+func NewClientConfig(nodeURI, grpcURI, chainID string, broadcastMode string, feesStr string, gas uint64, gasAdjustment float64,
 	gasPricesStr string) (cliConfig ClientConfig, err error) {
 
 	return ClientConfig{
 		NodeURI:       nodeURI,
+		GRpcURI:       grpcURI,
 		ChainID:       chainID,
 		BroadcastMode: broadcastMode,
 		Gas:           gas,

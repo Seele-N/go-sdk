@@ -11,6 +11,8 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	tmbytes "github.com/tendermint/tendermint/libs/bytes"
+
+	"google.golang.org/grpc"
 )
 
 const (
@@ -26,6 +28,7 @@ var (
 // SeeleClient seele client for Seele blockchain
 type SeeleClient struct {
 	rpc      rpcclient.Client
+	grpcConn *grpc.ClientConn
 	wallet   account.Wallet
 	config   *gosdktypes.ClientConfig
 	cdc      *gosdktypes.Codec
@@ -34,13 +37,25 @@ type SeeleClient struct {
 
 // NewSeeleClient create a new SeeleClient
 func NewSeeleClient(wallet account.Wallet, config gosdktypes.ClientConfig) *SeeleClient {
+
+	// Create a connection to the gRPC server.
+	grpcConn, err := grpc.Dial(
+		config.GRpcURI, // your gRPC server address.
+		grpc.WithInsecure(),
+		grpc.WithBlock(), // The SDK doesn't support any transport security mechanism.
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed to get grpc client: %s", err))
+	}
+
 	rpc, err := rpchttp.New(config.NodeURI, "/websocket")
 	if err != nil {
-		panic(fmt.Sprintf("failed to get client: %s", err))
+		panic(fmt.Sprintf("failed to get rpc client: %s", err))
 	}
 	cdc, appCodec := gosdktypes.NewCodec()
 	client := &SeeleClient{
 		rpc:      rpc,
+		grpcConn: grpcConn,
 		wallet:   wallet,
 		config:   &config,
 		cdc:      cdc,
