@@ -13,8 +13,10 @@ import (
 	"github.com/cosmos/go-bip39"
 
 	//ctypes "github.com/tendermint/tendermint/rpc/core/types"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	//"github.com/tendermint/tendermint/crypto"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
+	//"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 type Wallet interface {
@@ -47,10 +49,13 @@ func (w *wallet) ExportAsMnemonic() (string, error) {
 }
 
 func (w *wallet) ExportAsPrivateKey() (string, error) {
-	secpPrivateKey, ok := w.privKey.(secp256k1.PrivKey)
-	if !ok {
-		return "", fmt.Errorf(" Only PrivKeySecp256k1 key is supported ")
-	}
+	secpPrivateKey := w.privKey.Bytes()
+	/*
+		secpPrivateKey, ok := w.privKey.(secp256k1.PrivKey)
+		if !ok {
+			return "", fmt.Errorf(" Only PrivKeySecp256k1 key is supported ")
+		}
+	*/
 	return hex.EncodeToString(secpPrivateKey[:]), nil
 }
 
@@ -107,7 +112,8 @@ func (w *wallet) createFromMnemonic(mnemonic, keyPath string) error {
 	if err != nil {
 		return err
 	}
-	priKey := secp256k1.PrivKey(derivedPriv)
+
+	priKey := &secp256k1.PrivKey{Key: derivedPriv}
 	//addr := priKey.PubKey().Address()
 	//m.addr = addr
 	w.privKey = priKey
@@ -127,7 +133,7 @@ func (w *wallet) createFromPrivateKey(privateKey string) error {
 	}
 	var keyBytesArray [32]byte
 	copy(keyBytesArray[:], priBytes[:32])
-	priKey := secp256k1.PrivKey(keyBytesArray[:])
+	priKey := &secp256k1.PrivKey{Key: keyBytesArray[:]}
 	//addr := ctypes.AccAddress(priKey.PubKey().Address())
 	//w.addr = addr
 	w.privKey = priKey
@@ -156,7 +162,7 @@ func (w *wallet) createFromKeyStore(keystoreFile string, password string) error 
 	}
 	var keyBytesArray [32]byte
 	copy(keyBytesArray[:], keyBytes[:32])
-	priKey := secp256k1.PrivKey(keyBytesArray[:])
+	priKey := &secp256k1.PrivKey{Key: keyBytesArray[:]}
 	//addr := ctypes.AccAddress(priKey.PubKey().Address())
 	//m.addr = addr
 	w.privKey = priKey
