@@ -15,7 +15,6 @@ import (
 	//ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	
 )
 
 type Wallet interface {
@@ -108,7 +107,7 @@ func (w *wallet) createFromMnemonic(mnemonic, keyPath string) error {
 	if err != nil {
 		return err
 	}
-	priKey := secp256k1.GenPrivKeySecp256k1(derivedPriv)
+	priKey := secp256k1.PrivKey(derivedPriv)
 	//addr := priKey.PubKey().Address()
 	//m.addr = addr
 	w.privKey = priKey
@@ -128,7 +127,7 @@ func (w *wallet) createFromPrivateKey(privateKey string) error {
 	}
 	var keyBytesArray [32]byte
 	copy(keyBytesArray[:], priBytes[:32])
-	priKey := secp256k1.GenPrivKeySecp256k1(keyBytesArray[:])
+	priKey := secp256k1.PrivKey(keyBytesArray[:])
 	//addr := ctypes.AccAddress(priKey.PubKey().Address())
 	//w.addr = addr
 	w.privKey = priKey
@@ -157,7 +156,7 @@ func (w *wallet) createFromKeyStore(keystoreFile string, password string) error 
 	}
 	var keyBytesArray [32]byte
 	copy(keyBytesArray[:], keyBytes[:32])
-	priKey := secp256k1.GenPrivKeySecp256k1(keyBytesArray[:])
+	priKey := secp256k1.PrivKey(keyBytesArray[:])
 	//addr := ctypes.AccAddress(priKey.PubKey().Address())
 	//m.addr = addr
 	w.privKey = priKey
