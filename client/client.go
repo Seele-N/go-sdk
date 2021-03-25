@@ -65,7 +65,12 @@ func NewSeeleClient(wallet account.Wallet, config gosdktypes.ClientConfig) *Seel
 	return client
 }
 
-// // ABCIQuery sends a query to Seele
+// Wallet return client wallet account
+func (sc *SeeleClient) Wallet() account.Wallet {
+	return sc.wallet
+}
+
+// ABCIQuery sends a query to Seele
 func (sc *SeeleClient) ABCIQuery(path string, data tmbytes.HexBytes) ([]byte, error) {
 	if err := ValidateABCIQuery(path, data); err != nil {
 		return []byte{}, err
