@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // nolint
 type (
-	Coins = types.Coins
+	Coins = sdk.Coins
 )
 
 // QueryAccount gets the account associated with an address on Seele
@@ -27,4 +27,11 @@ func (c *SeeleClient) QueryAccountBank(addr string) (coins Coins, err error) {
 	}
 
 	return bankRes.GetBalances(), nil
+}
+
+// SendBankAmount send bank coins to address
+func (c *SeeleClient) SendBankAmount(addr sdk.AccAddress, coins Coins) {
+	addrsource := sdk.AccAddress(c.Wallet().GetPubAddress())
+	msg := banktypes.NewMsgSend(addrsource, addr, coins)
+	c.buildandsend([]sdk.Msg{msg})
 }
