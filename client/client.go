@@ -42,8 +42,8 @@ type SeeleClient struct {
 	wallet   account.Wallet
 	config   *gosdktypes.ClientConfig
 	cdc      *gosdktypes.Codec
-	txCfg    client.TxConfig
 	appCodec gosdktypes.AppCodec
+	txCfg    client.TxConfig
 }
 
 // NewSeeleClient create a new SeeleClient
